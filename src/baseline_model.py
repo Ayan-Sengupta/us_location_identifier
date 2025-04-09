@@ -2,7 +2,7 @@ from load_data import load_data
 from sklearn.model_selection import train_test_split
 
 # load the data 
-df = load_data('data/users_with_locations.csv')
+df = load_data('data/users_with_locations.csv.gz')
 
 # split data for k-fold cross validation
 X = df.drop(columns=['location_us'])
