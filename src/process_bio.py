@@ -3,6 +3,13 @@ import re
 from tqdm import tqdm
 from langdetect import detect, DetectorFactory
 from langdetect.lang_detect_exception import LangDetectException
+import logging
+
+
+# logging configuration
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
 
 # constanst
 # US cities and states for validation/lookup
@@ -119,14 +126,15 @@ def add_location_columns(df, nlp_model, batch_size=1000):
     # Filter out non-English bios
     # Detect language and filter for English bios -show a progress bar
     tqdm.pandas(desc="Detecting English bios")
-    # Use apply with tqdm to show progress
     # Use a lambda function to apply the is_english function to each bio
     english_df = df[df['full_bio'].progress_apply(lambda x: _is_english(x))]
     # Process in batches
     total_batches = (len(english_df) + batch_size - 1) // batch_size
     spacy_locations = []
+
+    logger.info(f"Filtered out {len(df) - len(english_df)} non-English bios\n")
     
-    for i in tqdm(range(total_batches), desc="Detecting locations", unit="batch"):
+    for i in tqdm(range(total_batches), desc="Detecting locations in bio", unit="batch"):
         start_idx = i * batch_size
         end_idx = min((i + 1) * batch_size, len(english_df))
         batch = english_df['full_bio'].iloc[start_idx:end_idx]
