@@ -62,7 +62,7 @@ zip_pattern = re.compile(r"\b\d{5}(?:-\d{4})?\b")
 # Function to detect language as english
 def _is_english(lang):
     """
-    Detect if the text is in English.
+    Detect if the text is in English. - no need for langdetect now
     """
     if lang == "en":
         return True
