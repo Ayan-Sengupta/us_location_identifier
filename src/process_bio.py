@@ -1,8 +1,6 @@
 # constants and functions to process the full bio datat of the reviewers - to extract any info about their geographical location
 import re
 from tqdm import tqdm
-from langdetect import detect, DetectorFactory
-from langdetect.lang_detect_exception import LangDetectException
 import logging
 
 
@@ -59,20 +57,18 @@ _top_us_cities = {
 state_pattern = re.compile(r"[A-Za-z\s]+,\s*([A-Z]{2})")
 zip_pattern = re.compile(r"\b\d{5}(?:-\d{4})?\b")
 
-# Set the seed for reproducibility
-DetectorFactory.seed = 42
 
 # helper functions 
 # Function to detect language as english
-def _is_english(text):
+def _is_english(lang):
     """
     Detect if the text is in English.
     """
-    try:
-        lang = detect(text)
-        return lang == "en"
-    except LangDetectException:
+    if lang == "en":
+        return True
+    else:
         return False
+        
 
 # Function to extract location from bio text using spaCy
 def _extract_location(text, nlp_model):
@@ -127,14 +123,14 @@ def add_location_columns(df, nlp_model, batch_size=1000):
     # Detect language and filter for English bios -show a progress bar
     tqdm.pandas(desc="Detecting English bios")
     # Use a lambda function to apply the is_english function to each bio
-    english_df = df[df['full_bio'].progress_apply(lambda x: _is_english(x))]
+    english_df = df[df['bio_language'].progress_apply(lambda x: _is_english(x))]
     # Process in batches
     total_batches = (len(english_df) + batch_size - 1) // batch_size
     spacy_locations = []
 
     logger.info(f"Filtered out {len(df) - len(english_df)} non-English bios\n")
     
-    for i in tqdm(range(total_batches), desc="Detecting locations in bio", unit="batch"):
+    for i in tqdm(range(total_batches), desc="Detecting locations in", unit="batch"):
         start_idx = i * batch_size
         end_idx = min((i + 1) * batch_size, len(english_df))
         batch = english_df['full_bio'].iloc[start_idx:end_idx]
