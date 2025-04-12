@@ -1,0 +1,5 @@
+langdetect==1.0.9
+pandas==2.2.3
+scikit_learn==1.6.1
+spacy==3.8.5
+tqdm==4.67.1
